@@ -24,5 +24,13 @@ app.get("/API", (req, res) => {
 	res.json("awesome")
 })
 
+setInterval(() => {
+	fetch("http://interstatus:50001/update", {
+		method: "post",
+		body: JSON.stringify({ name: "wback" }),
+		headers: { 'Content-Type': 'application/json' }
+	}).catch(e => { console.log("status server down") })
+}, 20000)
+
 const httpsServer = https.createServer(httpsOptions, app)
 httpsServer.listen(50250, "0.0.0.0", () => console.log("listening 433"))
