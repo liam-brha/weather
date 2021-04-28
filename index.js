@@ -36,8 +36,9 @@ rclient.on("error", function(error) {
 
 // core api end point for front end
 app.get("/API", (req, res) => {
+	let dataObj = { "temp": { "history": [] } }
 	rclient.KEYS("WEATHER:TEMP:HISTORY:*", (err, reply) => { // returns array of keys
-		keyList = reply
+		let keyList = reply
 		// awful bubble sort copied from other code
 		let cyclePass = [false] 
 		while(cyclePass.includes(false) == true) {
@@ -55,7 +56,7 @@ app.get("/API", (req, res) => {
 			}
 		}
 		let greatArray = [] // how to return x inside of callback to map arrow function???
-		reply.map(x => rclient.GET(x, (y, x) => greatArray.push(x)))
+		keyList.map(x => rclient.GET(x, (y, x) => greatArray.push(x)))
 		setTimeout(() => res.json(greatArray), 1000)
 	})
 })
