@@ -39,24 +39,26 @@ app.get("/API", (req, res) => {
 	let dataObj = { "temp": { "history": [] } }
 	rclient.KEYS("WEATHER:TEMP:HISTORY:*", (err, reply) => { // returns array of keys
 		let keyList = reply
-		// awful bubble sort copied from other code
-		let cyclePass = [false] 
-		while(cyclePass.includes(false) == true) {
-			cyclePass = []
-			for(i in keyList) {
-				try {
-					if(parseInt(keyList[i].split(":")[3]) > parseInt(keyList[parseInt(i) + 1].split(":")[3])) {
-						[keyList[i], keyList[parseInt(i) + 1]] = [keyList[parseInt(i) + 1], keyList[i]];
-						cyclePass.push(false)
-					}
-					else {
-						cyclePass.push(true)
-					}
-				}catch(e){}
-			}
-		}
 		keyList.map((x) => rclient.GET(x, (y, z) => { dataObj.temp.history.push({ "date": x.split(":")[3], "data": z }) }))
-		setTimeout(() => res.json(dataObj), 1000)
+		setTimeout(() => { 
+			// awful bubble sort copied from other code
+			let cyclePass = [false] 
+			while(cyclePass.includes(false) == true) {
+				cyclePass = []
+				for(i in keyList) {
+					try {
+						if(parseInt(dataObj.temp.history[i].date.split(":")[3]) > parseInt(dataObj.temp.history[i].date[parseInt(i) + 1].split(":")[3])) {
+							[dataObj.temp.history[i].date[i], dataObj.temp.history[i].date[parseInt(i) + 1]] = [dataObj.temp.history[i].date[parseInt(i) + 1], dataObj.temp.history[i].date[i]];
+							cyclePass.push(false)
+						}
+						else {
+							cyclePass.push(true)
+						}
+					}catch(e){}
+				}
+			}
+			res.json(dataObj)
+			}, 1000)
 	})
 })
 
