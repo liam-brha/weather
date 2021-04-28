@@ -55,7 +55,7 @@ app.get("/API", (req, res) => {
 				}catch(e){}
 			}
 		}
-		keyList.map((x) => rclient.GET(x, (y, z) => { dataObj.history.push({ "date": x, "data": z }) }))
+		keyList.map((x) => rclient.GET(x, (y, z) => { dataObj.temp.history.push({ "date": x, "data": z }) }))
 		setTimeout(() => res.json(dataObj), 1000)
 	})
 })
