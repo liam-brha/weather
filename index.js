@@ -55,8 +55,7 @@ app.get("/API", (req, res) => {
 				}catch(e){}
 			}
 		}
-		let greatArray = [] // how to return x inside of callback to map arrow function???
-		keyList.map(x => rclient.GET(x, (y, x) => greatArray.push(x)))
+		let greatArray = keyList.map(x => rclient.GET(x, (y, x) => x)) // how to return x inside of callback to map arrow function???
 		setTimeout(() => res.json(greatArray), 1000)
 	})
 })
