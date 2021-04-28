@@ -7,6 +7,8 @@ const express = require("express");
 const redis = require("redis");
 const fetch = require("node-fetch");
 
+const false_data = require("./false_data.json")
+
 httpsOptions = {
 	cert: fs.readFileSync("./ssl/back_textedit_dev.crt"),
 	ca: fs.readFileSync("./ssl/back_textedit_dev.ca-bundle"),
@@ -24,7 +26,7 @@ app.use((req, res, next) => {
 })
 
 // redis app config
-const rclient = redis.createClient("redis://redis:6379");
+const rclient = redis.createClient("redis://some-redis:6379");
 rclient.on("error", function(error) {
   console.error(error);
 });
@@ -59,24 +61,7 @@ app.get("/API", (req, res) => {
 })
 
 function historyfetch(callback) {
-	// I was forced to spoof the user agent, because BOM dont like web scrapers on json endpoints??? 
-	// told me "eufuhef automated request detected go away" so i was forced to spoof it and hope i dont end up with my ip blacklisted or something
-	fetch("http://www.bom.gov.au/fwo/IDV60701/IDV60701.95936.json", {
-	  "headers": {
-	    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-	    "accept-language": "en-US,en;q=0.9",
-	    "cache-control": "no-cache",
-	    "pragma": "no-cache",
-	    "upgrade-insecure-requests": "1",
-	    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 OPR/75.0.3969.218",
-	    "cookie": process.env.cookie
-	  },
-	  "referrerPolicy": "strict-origin-when-cross-origin",
-	  "body": null,
-	  "method": "GET",
-	  "mode": "cors"
-	}).then(res => { return res.json() }) // parse data // res.text().then(x => console.log(x)); 
-	.then(data => {
+	function yeah(data) {
 		// data object generation struc
 		// newdata; head of the object
 		// temp; object; temperature data
@@ -98,7 +83,7 @@ function historyfetch(callback) {
 			rclient.set(`WEATHER:TEMP:HISTORY:${newData.temp.overtime[i].date}`, `${newData.temp.overtime[i].temp}`)
 		}
 		callback()
-	})
+	}; yeah(false_data);
 }
 
 setInterval(historyfetch, 1800000) // every 30 minutes
