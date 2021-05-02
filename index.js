@@ -7,111 +7,124 @@ const express = require("express");
 const redis = require("redis");
 const fetch = require("node-fetch");
 
-httpsOptions = {
-	cert: fs.readFileSync("./ssl/back_textedit_dev.crt"),
-	ca: fs.readFileSync("./ssl/back_textedit_dev.ca-bundle"),
-	key: fs.readFileSync("./ssl/back_textedit_dev.key")
-}
+console.log(process.env.opentoken)
 
 // express app config
 const app = express();
 app.use(express.static("./public"));
-app.use((req, res, next) => {
-	if(req.protocol === "http") {
-		res.redirect(301, `https://${req.headers.host}${req.url}`)
-	}
-	next()
-})
+// app.use((req, res, next) => {
+// 	if(req.protocol === "http") {
+// 		res.redirect(301, `https://${req.headers.host}${req.url}`)
+// 	}
+// 	next()
+// })
 
 // redis app config
-const rclient = redis.createClient("redis://redis:6379");
+const rclient = redis.createClient("redis://some-redis:6379");
+
 rclient.on("error", function(error) {
   console.error(error);
 });
 
 // end points
-// im too cool for error handling. if the api responds with unexpected data, LET THE APP CRASH
 
 // core api end point for front end
+// i dont know how to write async stuff synchronously without being an absolute fucking mess
 app.get("/API", (req, res) => {
-	rclient.KEYS("WEATHER:TEMP:HISTORY:*", (err, reply) => { // returns array of keys
-		keyList = reply
-		// awful bubble sort copied from other code
-		let cyclePass = [false] 
-		while(cyclePass.includes(false) == true) {
-			cyclePass = []
-			for(i in keyList) {
-				try {
-					if(parseInt(keyList[i].split(":")[3]) > parseInt(keyList[parseInt(i) + 1].split(":")[3])) {
-						[keyList[i], keyList[parseInt(i) + 1]] = [keyList[parseInt(i) + 1], keyList[i]];
-						cyclePass.push(false)
+	// object skeleton
+	let dataObj = { "temp": { "history": { "svn": [], "tmr": [] }, "current": "" }, "map of types": "/api/skeleton" }
+	// fetch live data
+	fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,daily,alerts&appid=${process.env.opentoken}&units=metric`)
+	.then(res => res.json()) // parsing data
+	.then(x => dataObj.temp.current = x.current.temp) // pushing data
+	.then(() => {
+		// db data fetching
+		function callFunc(callback) {
+			let forecast_tmr = []
+			// retrive references to relevant keys
+			rclient.KEYS("WEATHER:TEMP:HISTORY:FORECAST:TMR:*", (err, reply) => {
+				// temp data store
+				let keyList = reply
+				// mass fetch values for relevant keys
+				rclient.MGET(keyList, (err, reply) => {
+					// construct array
+					for(i in reply) {
+						forecast_tmr.push({ "time": keyList[i].split(":")[5], "value": reply[i]})
 					}
-					else {
-						cyclePass.push(true)
-					}
-				}catch(e){}
-			}
+					callback(forecast_tmr)
+				})
+			})
 		}
-		let greatArray = [] // how to return x inside of callback to map arrow function???
-		reply.map(x => rclient.GET(x, (y, x) => greatArray.push(x)))
-		setTimeout(() => res.json(greatArray), 1000)
+		// complete response construction + reply with data
+		callFunc((tmr) => { 
+			function callFunc2(callback) {
+				let forecast_svn = []
+				// retrive references to relevant keys
+				rclient.KEYS("WEATHER:TEMP:HISTORY:FORECAST:SVN:*", (err, reply) => {
+					// temp data store
+					let keyList = reply
+					// mass fetch values for relevant keys
+					rclient.MGET(keyList, (err, reply) => {
+						// construct array
+						for(i in reply) {
+							forecast_svn.push({ "time": keyList[i].split(":")[5], "value": reply[i]})
+						}
+						callback(forecast_svn)
+					})
+				})
+			}
+			callFunc2(svn => {
+				dataObj.temp.history.svn.push(...svn);
+				dataObj.temp.history.tmr.push(...tmr);
+				res.json(dataObj);
+			})	
+		})
 	})
 })
 
-function historyfetch(callback) {
-	// I was forced to spoof the user agent, because BOM dont like web scrapers on json endpoints??? 
-	// told me "eufuhef automated request detected go away" so i was forced to spoof it and hope i dont end up with my ip blacklisted or something
-	fetch("http://www.bom.gov.au/fwo/IDV60701/IDV60701.95936.json", {
-	  "headers": {
-	    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-	    "accept-language": "en-US,en;q=0.9",
-	    "cache-control": "no-cache",
-	    "pragma": "no-cache",
-	    "upgrade-insecure-requests": "1",
-	    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 OPR/75.0.3969.218",
-	    "cookie": process.env.cookie
-	  },
-	  "referrerPolicy": "strict-origin-when-cross-origin",
-	  "body": null,
-	  "method": "GET",
-	  "mode": "cors"
-	}).then(res => { return res.json() }) // parse data // res.text().then(x => console.log(x)); 
-	.then(data => {
-		// data object generation struc
-		// newdata; head of the object
-		// temp; object; temperature data
-		// overtime; an array of objects; {temp(int), date(string)}; air temp polled every 30 minutes
-		// ... date(string) is formatted year/month/day/hour/minute/second with each being two digets except year
-		// ... example being 20210426213000
-		let newData = {
-			"temp": {
-				"overtime": [] // {temp, date}
+// data collection + db construction for historical data
+function historyfetch() {
+	// object skeleton
+	let newData = {
+		"temp": {
+			"forecastHistory": {
+				"tomorrow": undefined,
+				"sevenday": undefined
+			},
+			"history": undefined
+		}
+	}
+	// data fetch for future weather
+	fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,alerts&appid=${process.env.opentoken}&units=metric`)
+	.then(res => res.json())
+	.then(fetchedData => {
+		console.log(fetchedData)
+		// object construction
+		newData.temp.forecastHistory.tomorrow = { "temp": fetchedData.daily[1].temp, "date": fetchedData.daily[1].dt }
+		newData.temp.forecastHistory.sevenday = { "temp": fetchedData.daily[fetchedData.daily.length - 1].temp, "date": fetchedData.daily[fetchedData.daily.length - 1].dt }
+		newData.temp.history = { "temp": fetchedData.current.temp, "date": fetchedData.current.dt }
+		// redis key consctruction and pushing
+		rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:${new Date(parseInt(newData.temp.forecastHistory.tomorrow.date*1000)).toISOString().split("T")[0]}`, `${newData.temp.forecastHistory.tomorrow.temp.max}`)
+		rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:${new Date(parseInt(newData.temp.forecastHistory.sevenday.date*1000)).toISOString().split("T")[0]}`, `${newData.temp.forecastHistory.sevenday.temp.max}`)
+		let relevantKey = `WEATHER:TEMP:HISTORY:REAL:${new Date(parseInt(newData.temp.history.date*1000)).toISOString().split("T")[0]}`
+		rclient.exists(relevantKey, (err, reply) => {
+			// inilise key if non existant and update value if max temp for that day increased
+			if(reply == 1) {
+				rclient.get(relevantKey, (err, reply) => {
+					if(parseInt(reply) < fetchedData.current.temp) {
+						rclient.set(relevantKey, `${newData.temp.history.temp}`)
+					}
+				})
+			} else {
+				rclient.set(relevantKey, `${newData.temp.history.temp}`)
 			}
-		}
-		for(i in data.observations.data) {
-			newData.temp.overtime.push({ "temp": data.observations.data[i].air_temp, "date": data.observations.data[i].local_date_time_full })
-		}
-		// redis db struc
-		// db_name:element:type
-		// type history uses :date with the data being the temp
-		for(i in newData.temp.overtime) {
-			rclient.set(`WEATHER:TEMP:HISTORY:${newData.temp.overtime[i].date}`, `${newData.temp.overtime[i].temp}`)
-		}
-		callback()
+		})
 	})
 }
-
-setInterval(historyfetch, 1800000) // every 30 minutes
-
-historyfetch(() => {
-	setTimeout(() => {
-		rclient.KEYS("WEATHER:TEMP:HISTORY:*", (err, reply) => { // returns array of keys
-			reply.map(x => rclient.GET(x, (y, x) => console.log(x)))
-			// map is NOT to be used like this. it is for generating
-			// new arrays. but uh ... operateor wouldnt work.
-		})
-	}, 2000)
-})
+// inital dataset generation
+historyfetch()
+// refresh dataset every hour
+setInterval(historyfetch, 3600000)
 
 // status server polling
 setInterval(() => {
@@ -122,8 +135,16 @@ setInterval(() => {
 	}).catch(e => { console.log("status server down") })
 }, 20000)
 
+// importing ssl details
+// httpsOptions = {
+// 	cert: fs.readFileSync("./ssl/back_textedit_dev.crt"),
+// 	ca: fs.readFileSync("./ssl/back_textedit_dev.ca-bundle"),
+// 	key: fs.readFileSync("./ssl/back_textedit_dev.key")
+// }
 // server initialisation
-const httpsServer = https.createServer(httpsOptions, app)
-httpsServer.listen(50300, "0.0.0.0", () => console.log("listening 433"))
-// const httpServer = http.createServer(app)
-// httpServer.listen(3000, () => console.log("listening"))
+// const httpsServer = https.createServer(httpsOptions, app)
+// httpsServer.listen(50300, "0.0.0.0", () => console.log("listening 433"))
+
+// local testing
+const httpServer = http.createServer(app)
+httpServer.listen(50300, () => console.log("listening"))
