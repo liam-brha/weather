@@ -7,6 +7,8 @@ const express = require("express");
 const redis = require("redis");
 const fetch = require("node-fetch");
 
+console.log(process.env.opentoken)
+
 // express app config
 const app = express();
 app.use(express.static("./public"));
@@ -27,86 +29,102 @@ rclient.on("error", function(error) {
 // end points
 
 // core api end point for front end
+// i dont know how to write async stuff synchronously without being an absolute fucking mess
 app.get("/API", (req, res) => {
 	// object skeleton
-	let dataObj = { "temp": { "history": [], "current": "" }, "map of types": "/api/skeleton" }
-	// db data fetching
-	function callFunc(callback) {
-		// retrive references to relevant keys
-		rclient.KEYS("WEATHER:TEMP:HISTORY:*", (err, reply) => {
-			// copy keys. I probably didnt need this in all honesty.
-			let keyList = reply
-			// awful bubble sort that orders keys chronologically
-			let cyclePass = [false] 
-			while(cyclePass.includes(false) == true) {
-				cyclePass = []
-				for(i in keyList) {
-					try {
-						if(parseInt(keyList[i].split(":")[3]) > parseInt(keyList[parseInt(i) + 1].split(":")[3])) {
-							[keyList[i], keyList[parseInt(i) + 1]] = [keyList[parseInt(i) + 1], keyList[i]];
-							cyclePass.push(false)
-						}
-						else {
-							cyclePass.push(true)
-						}
-					}catch(e){}
-				}
-			}
-			// matching keys to values and constructing list
-			// how to return value inside of callback to map function???
-			// I'm using map in an unintended way here
-			let greatArray = []
-			reply.map(x => rclient.GET(x, (y, z) => greatArray.push({ "date": x.split(":")[3], "value": z })))
-
-			// i give up. sometimes the returned dataset will be incomplete. spent 10 hours trying
-			// fix this. i just dont care anymore. nobody is going to realise anyway.
-
-			// return list serialised from db
-			setTimeout(() => callback(greatArray), 1000)
-		})
-	}
-	// live data fetching
-	fetch("https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,daily,alerts&appid=apikey&units=metric")
+	let dataObj = { "temp": { "history": { "svn": [], "tmr": [] }, "current": "" }, "map of types": "/api/skeleton" }
+	// fetch live data
+	fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,daily,alerts&appid=${process.env.opentoken}&units=metric`)
 	.then(res => res.json()) // parsing data
 	.then(x => dataObj.temp.current = x.current.temp) // pushing data
-	// complete response construction + reply with data
-	callFunc((x) => { 
-		dataObj.temp.history.push(...x);
-		res.json(dataObj);
+	.then(() => {
+		// db data fetching
+		function callFunc(callback) {
+			let forecast_tmr = []
+			// retrive references to relevant keys
+			rclient.KEYS("WEATHER:TEMP:HISTORY:FORECAST:TMR:*", (err, reply) => {
+				// temp data store
+				let keyList = reply
+				// mass fetch values for relevant keys
+				rclient.MGET(keyList, (err, reply) => {
+					// construct array
+					for(i in reply) {
+						forecast_tmr.push({ "time": keyList[i].split(":")[5], "value": reply[i]})
+					}
+					callback(forecast_tmr)
+				})
+			})
+		}
+		// complete response construction + reply with data
+		callFunc((tmr) => { 
+			function callFunc2(callback) {
+				let forecast_svn = []
+				// retrive references to relevant keys
+				rclient.KEYS("WEATHER:TEMP:HISTORY:FORECAST:SVN:*", (err, reply) => {
+					// temp data store
+					let keyList = reply
+					// mass fetch values for relevant keys
+					rclient.MGET(keyList, (err, reply) => {
+						// construct array
+						for(i in reply) {
+							forecast_svn.push({ "time": keyList[i].split(":")[5], "value": reply[i]})
+						}
+						callback(forecast_svn)
+					})
+				})
+			}
+			callFunc2(svn => {
+				dataObj.temp.history.svn.push(...svn);
+				dataObj.temp.history.tmr.push(...tmr);
+				res.json(dataObj);
+			})	
+		})
 	})
 })
-app.get("/api/skeleton", (req, res) => {
-	res.json({ "temp": { "history": [{ "date": "list in _ format", "value": "str" }], "current": "int" } })
-})
-
 
 // data collection + db construction for historical data
 function historyfetch() {
 	// object skeleton
 	let newData = {
 		"temp": {
-			"overtime": [] // {temp, date}
+			"forecastHistory": {
+				"tomorrow": undefined,
+				"sevenday": undefined
+			},
+			"history": undefined
 		}
 	}
-	// data fetch
-	fetch("https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,alerts&appid=apikey&units=metric")
+	// data fetch for future weather
+	fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,alerts&appid=${process.env.opentoken}&units=metric`)
 	.then(res => res.json())
 	.then(fetchedData => {
 		console.log(fetchedData)
-		// // object construction
-		// for(i in data.observations.data) {
-		// 	newData.temp.overtime.push({ "temp": data.observations.data[i].air_temp, "date": data.observations.data[i].local_date_time_full })
-		// }
-		// // redis key consctruction and pushing
-		// for(i in newData.temp.overtime) {
-		// 	rclient.set(`WEATHER:TEMP:HISTORY:${newData.temp.overtime[i].date}`, `${newData.temp.overtime[i].temp}`)
-		// }
+		// object construction
+		newData.temp.forecastHistory.tomorrow = { "temp": fetchedData.daily[1].temp, "date": fetchedData.daily[1].dt }
+		newData.temp.forecastHistory.sevenday = { "temp": fetchedData.daily[fetchedData.daily.length - 1].temp, "date": fetchedData.daily[fetchedData.daily.length - 1].dt }
+		newData.temp.history = { "temp": fetchedData.current.temp, "date": fetchedData.current.dt }
+		// redis key consctruction and pushing
+		rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:${new Date(parseInt(newData.temp.forecastHistory.tomorrow.date*1000)).toISOString().split("T")[0]}`, `${newData.temp.forecastHistory.tomorrow.temp.max}`)
+		rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:${new Date(parseInt(newData.temp.forecastHistory.sevenday.date*1000)).toISOString().split("T")[0]}`, `${newData.temp.forecastHistory.sevenday.temp.max}`)
+		let relevantKey = `WEATHER:TEMP:HISTORY:REAL:${new Date(parseInt(newData.temp.history.date*1000)).toISOString().split("T")[0]}`
+		rclient.exists(relevantKey, (err, reply) => {
+			// inilise key if non existant and update value if max temp for that day increased
+			if(reply == 1) {
+				rclient.get(relevantKey, (err, reply) => {
+					if(parseInt(reply) < fetchedData.current.temp) {
+						rclient.set(relevantKey, `${newData.temp.history.temp}`)
+					}
+				})
+			} else {
+				rclient.set(relevantKey, `${newData.temp.history.temp}`)
+			}
+		})
 	})
 }
 // inital dataset generation
 historyfetch()
-// refresh dataset every 30 minutes
-setInterval(historyfetch, 1800000)
+// refresh dataset every hour
+setInterval(historyfetch, 3600000)
 
 // status server polling
 setInterval(() => {
