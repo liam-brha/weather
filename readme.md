@@ -10,7 +10,7 @@ My inital goal was to create a website at weather.textedit.dev that would report
 - docker
 - redis
 - express
-- vultr/netlify
+- vultr/netlify\
 client side:
 - vanilla js
 - css
