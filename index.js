@@ -32,7 +32,13 @@ rclient.on("error", function(error) {
 // i dont know how to write async stuff synchronously without being an absolute fucking mess
 app.get("/API", (req, res) => {
 	// object skeleton
-	let dataObj = { "temp": { "history": { "svn": [], "tmr": [], "trueData": [] }, "current": "" } }
+	let tempNum = Math.floor(Math.random() * 36).toString()
+	while(tempNum == 0) {
+		tempNum = Math.floor(Math.random() * 36).toString()
+	}
+	let dataObj = { "temp": { "history": { "svn": [], "tmr": [], "trueData": [] }, "current": "" },
+		"background": "https://tetr.io/res/bg/" + tempNum.toString()  + ".jpg"
+	}
 	// fetch live data
 	fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,daily,alerts&appid=${process.env.opentoken}&units=metric`)
 	.then(res => res.json()) // parsing data
@@ -94,11 +100,28 @@ app.get("/API", (req, res) => {
 					dataObj.temp.history.svn.push(...svn);
 					dataObj.temp.history.tmr.push(...tmr);
 					dataObj.temp.history.trueData.push(...trueData); // took me 30 minutes to realise i copied ...tmr
+					res.header("Access-Control-Allow-Origin", "*")
 					res.json(dataObj);
 				})
 			})	
 		})
 	})
+})
+
+app.get("/dbInjection", (req, res) => {
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-16`, 20)
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-17`, 22)
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-18`, 23)
+
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-16`, 25)
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-17`, 27)
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-18`, 19)
+
+	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-16`, 23)
+	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-17`, 25)
+	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-18`, 22)
+
+	res.json("OK")
 })
 
 // data collection + db construction for historical data
@@ -140,9 +163,9 @@ function historyfetch() {
 	})
 }
 // inital dataset generation
-historyfetch()
+// historyfetch()
 // refresh dataset every hour
-setInterval(historyfetch, 600000)
+// setInterval(historyfetch, 600000)
 
 // status server polling
 setInterval(() => {
