@@ -1,14 +1,46 @@
-<DOCTYPE html>
 <html>
 <head>
 	<title>awesome</title>
+	<link href="css/index.css" rel="stylesheet">
 </head>
 <body>
-	<p>this is a test</p>
-	<button onclick='apiPoll()'>pollAPI</button>
-	<div id="datadiv">
-		<p>uh</p>
+	<content>
+		<div id="page">
+			<div id="CurrentTempBox" style="right: 0;">
+				<p id="CurrentTemp"></p>
+				<div class="locationbox">
+					<i class="locationText">Melbourne, Australia</i>
+				</div>
+			</div>
+			<div id="graph" style="right: -1200px;">
+			</div>
+		</div>
+	</content>
+	<div id="bar">
+		<a href="https://github.com/XcodeBoi/Weather-Website">
+			<div id="github">
+				<div class="gitImgControl">
+					<img src="resources/github.png">
+				</div>
+			</div>
+		</a>
+		<div class="middle">
+			<div class="arrowGrid">
+				<div id="leftArrow">
+					<svg style="transform: rotate(180deg)" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.15 16"><defs><style>.cls-1{fill:#ff9aa2;}</style></defs><path class="cls-1" d="M8.82,8.76,2,15.67a1.12,1.12,0,0,1-1.59,0,1.11,1.11,0,0,1,0-1.58L6.44,8,.33,1.92A1.12,1.12,0,0,1,.33.33a1.11,1.11,0,0,1,1.58,0l6.9,6.85A1.16,1.16,0,0,1,9.15,8a1.11,1.11,0,0,1-.33.79"/></svg>
+				</div>
+				<div id="arrow">
+					<svg style="transform: rotate(270deg)" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.15 16"><defs><style>.cls-1{fill:#ff9aa2;}</style></defs><path class="cls-1" d="M8.82,8.76,2,15.67a1.12,1.12,0,0,1-1.59,0,1.11,1.11,0,0,1,0-1.58L6.44,8,.33,1.92A1.12,1.12,0,0,1,.33.33a1.11,1.11,0,0,1,1.58,0l6.9,6.85A1.16,1.16,0,0,1,9.15,8a1.11,1.11,0,0,1-.33.79"/></svg>
+				</div>
+				<div id="rightArrow">
+					<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.15 16"><defs><style>.cls-1{fill:#ff9aa2;}</style></defs><path class="cls-1" d="M8.82,8.76,2,15.67a1.12,1.12,0,0,1-1.59,0,1.11,1.11,0,0,1,0-1.58L6.44,8,.33,1.92A1.12,1.12,0,0,1,.33.33a1.11,1.11,0,0,1,1.58,0l6.9,6.85A1.16,1.16,0,0,1,9.15,8a1.11,1.11,0,0,1-.33.79"/></svg>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="barbox">
 	</div>
 	<script src="js/index.js"></script>
+	<script src="https://code.highcharts.com/highcharts.js"></script>
 </body>
 </html>
