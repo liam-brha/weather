@@ -30,6 +30,19 @@ page.addEventListener("mouseenter", (event) => {
 	arrowright.style.bottom = "-40px"
 	github.style.bottom = "-40px"
 })
+arrowleft.addEventListener("mouseenter", (event) => {
+	arrowleft.style.bottom = "0px"
+})
+arrowleft.addEventListener("mouseleave", (event) => {
+	arrowleft.style.bottom = "-7px"
+})
+arrowright.addEventListener("mouseenter", (event) => {
+	arrowright.style.bottom = "0px"
+})
+arrowright.addEventListener("mouseleave", (event) => {
+	arrowright.style.bottom = "-7px"
+})
+ 
 
 // api data handling
 fetch("http://localhost:50300/api")
