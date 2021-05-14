@@ -45,7 +45,7 @@ arrowright.addEventListener("mouseleave", (event) => {
  
 
 // api data handling
-fetch("http://localhost:50300/api")
+fetch("https://back.textedit.dev:50300/api")
 .then(res => res.json())
 .then(response => {
 	// background loading
@@ -67,11 +67,11 @@ arrowleft.addEventListener("click", (event) => {
 	if(moveLock == false) {
 		moveLock = true
 		currentStatus.off.style.right = "0px"
-		currentStatus.mid.style.right = "1200px"
+		currentStatus.mid.style.right = "1600px"
 
 		setTimeout(() => {
 			currentStatus.mid.style.transition = "all 0s"
-			currentStatus.mid.style.right = "-1200"
+			currentStatus.mid.style.right = "-1600"
 			setTimeout(() => {
 				currentStatus.mid.style.transition = "all 1.5s"
 				let newCurrentStatus = {
@@ -89,11 +89,11 @@ arrowright.addEventListener("click", (event) => {
 	if(moveLock == false) {
 		moveLock = true
 		currentStatus.off.style.transition = "all 0s"
-		currentStatus.off.style.right = "1200"
+		currentStatus.off.style.right = "1600"
 		setTimeout(() => {
 			currentStatus.off.style.transition = "all 1.5s"
 			currentStatus.off.style.right = "0"
-			currentStatus.mid.style.right = "-1200"
+			currentStatus.mid.style.right = "-1600"
 			setTimeout(() => {
 				let newCurrentStatus = {
 					"off": currentStatus.mid,
