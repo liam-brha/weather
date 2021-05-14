@@ -1,4 +1,4 @@
 #! /usr/local/bin/fish
 docker container rm wback -f
 docker build -t wback .
-docker run --name wback --network my-net -p 50300:50300 wback
+docker run --name wback --env-file .env --network my-net -p 50300:50300 wback

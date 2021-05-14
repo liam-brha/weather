@@ -32,7 +32,7 @@ rclient.on("error", function(error) {
 // i dont know how to write async stuff synchronously without being an absolute fucking mess
 app.get("/API", (req, res) => {
 	// object skeleton
-	let dataObj = { "temp": { "history": { "svn": [], "tmr": [] }, "current": "" }, "map of types": "/api/skeleton" }
+	let dataObj = { "temp": { "history": { "svn": [], "tmr": [], "trueData": [] }, "current": "" } }
 	// fetch live data
 	fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,daily,alerts&appid=${process.env.opentoken}&units=metric`)
 	.then(res => res.json()) // parsing data
@@ -74,9 +74,28 @@ app.get("/API", (req, res) => {
 				})
 			}
 			callFunc2(svn => {
-				dataObj.temp.history.svn.push(...svn);
-				dataObj.temp.history.tmr.push(...tmr);
-				res.json(dataObj);
+				function callFunc3(callback) {
+					let trueData = []
+					// retrive references to relevant keys
+					rclient.KEYS("WEATHER:TEMP:HISTORY:REAL:*", (err, reply) => {
+						// temp data store
+						let keyList = reply
+						// mass fetch values for relevant keys
+						rclient.MGET(keyList, (err, reply) => {
+							// construct array
+							for(i in reply) {
+								trueData.push({ "time": keyList[i].split(":")[5], "value": reply[i]})
+							}
+							callback(trueData)
+						})
+					})
+				}
+				callFunc3((trueData) => {
+					dataObj.temp.history.svn.push(...svn);
+					dataObj.temp.history.tmr.push(...tmr);
+					dataObj.temp.history.trueData.push(...tmr);
+					res.json(dataObj);
+				})
 			})	
 		})
 	})

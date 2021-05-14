@@ -73,11 +73,37 @@ The control flow of the program is event-driven, with a functional program appro
 ### event triggers
 The event triggers are handled by expressjs, a nodejs framework for serving requests. The framework isn't verbose at all if you don't want it to be, which is great for me as it greatly simplifies my job. There is only one actual endpoint for my website, handled by `app.get` with a string and a callback. The only other event trigger is `rclient.on` which is just for configuring the handling of the Redis database.
 #### /API/ walkthrough
-Initially, the skeleton of the object we wish to resolve the request to is constructed. We then fetch the current weather data from the moment and incorporate the relevant fields into the object. The historical data is also fetched, and then the object is refined into its final form and served to the request.
+Initially, the skeleton of the object we wish to resolve the request to is constructed. We then fetch the current weather data from the moment and incorporate the relevant fields into the object. The historical data is also fetched, and then the object is refined into its final form and served to the request. The style of chaining callbacks is rather awkward in my eyes, but I have not been taught not to do it like this so I shall. In retrospect, I really should have used a function for this. Rather than copying and pasting the code three times. This is like the most elementry use of a function possible and I didn't do it. In fact, asynchronously fetching the data from all three of the db keys would have made so much more sense. JS is litterally built for this.
+#### /API/ object structure
+```json
+{
+	"temp": {
+		"history": {
+			"svn": [{
+				"time": "ISOSTRING",
+				"value": "2 DECIMAL POINT NUMBER IN STRING FORM"
+			}],
+			"tmr": [{
+				"time": "ISOSTRING",
+				"value": "2 DECIMAL POINT NUMBER IN STRING FORM"
+			}],
+			"trueData": [{
+				"time": "ISOSTRING",
+				"value": "2 DECIMAL POINT NUMBER IN STRING FORM"
+			}]
+		},
+		"current": "2 DECIMAL POINT NUMBER IN STRING FORM"
+	}
+}
+```
+The use of strings in the return values is because of the way I stored values in the redisdb. Everything is a string.
 ### timers
 A timer is set to execute once an hour that fetches the weather data of the time and writes it into the database. Another timer polls the internal status server.
 
 ## Front end
+
+### inital loading and structure of document
+==============
 
 # Issues
 ## CORS
@@ -99,6 +125,9 @@ This shouldn't have delayed me as much as I did. For a segment of the project, I
 
 ## Container health
 Containers are not auto restarted when they go down or anything like that, causing problematic service reliability. Learning and implementing Kubernetes would solve this, though I am not in the state of mind right now to continue working on this godforsaken project. It went downhill as soon as I didn't properly write a design doc beforehand.
+
+## Dates
+Dates suck. It was problematic. As of writing, it is still problematic. The whole world should just use utc and abolish time zones. Even better lets just use unix time.
 
 # Testing
 Yeah no I didn't test properly. That's all I have to say for this heading. I don't know how to test things properly.
