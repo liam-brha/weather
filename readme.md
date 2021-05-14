@@ -80,23 +80,24 @@ Initially, the skeleton of the object we wish to resolve the request to is const
 	"temp": {
 		"history": {
 			"svn": [{
-				"time": "ISOSTRING",
+				"time": "ISODATESTRING",
 				"value": "2 DECIMAL POINT NUMBER IN STRING FORM"
 			}],
 			"tmr": [{
-				"time": "ISOSTRING",
+				"time": "ISODATESTRING",
 				"value": "2 DECIMAL POINT NUMBER IN STRING FORM"
 			}],
 			"trueData": [{
-				"time": "ISOSTRING",
+				"time": "ISODATESTRING",
 				"value": "2 DECIMAL POINT NUMBER IN STRING FORM"
 			}]
 		},
-		"current": "2 DECIMAL POINT NUMBER IN STRING FORM"
+		"current": "2 DECIMAL FLOAT"
 	}
 }
 ```
-The use of strings in the return values is because of the way I stored values in the redisdb. Everything is a string.
+The use of strings in the return values is because of the way I stored values in the redisdb. Everything is a string.\
+`isodatestring` actually is an iso date string with the time cut off, its just the date.
 ### timers
 A timer is set to execute once an hour that fetches the weather data of the time and writes it into the database. Another timer polls the internal status server.
 
