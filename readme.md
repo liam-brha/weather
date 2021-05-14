@@ -106,7 +106,8 @@ Initially, the skeleton of the object we wish to resolve the request to is const
 			}]
 		},
 		"current": "2 DECIMAL FLOAT"
-	}
+	}, 
+	"background": "url"
 }
 ```
 The use of strings in the return values is because of the way I stored values in the redisdb. Everything is a string.\
@@ -116,8 +117,15 @@ A timer is set to execute once an hour that fetches the weather data of the time
 
 ## Front end
 
-### inital loading and structure of document
-==============
+The front end ended up being a very enjoyable part of the project that I did 95% of in one night. 
+
+### Animations
+
+Much of my time spent was on animations, and making the site look pretty. It was an intruging and useful exercise for future projects, but is irrelevant to what I will be marked on.
+
+### Data retrival
+
+All the data is retrived through the single endpoint, and then a graph is constructed around it. It also constructs the current temperature box and sets the background.
 
 # Issues
 ## CORS
