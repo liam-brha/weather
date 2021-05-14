@@ -32,7 +32,20 @@ A key issue with rebuilding the docker container every single time was speed. My
 Static file hosting is separated from the main backend server to both simplify and divide the codebase and to reduce the load on the main backend. If this website had more than about one user a month then it would save my main backend server a great deal of load to serve static files through netlify. I added the backend contains into my existing VPS.
 
 ## Docker
-The main program runs inside of a docker container linked with two other containers - one is the Redis database and the other is my status server. The status server is a custom-built solution for quickly checking the status of all my web apps from a publically facing interface, saving the hassle of logging into the VPS and running docker commands. Unfortunately, it's rather unstable and likes to exit with no log on why. That system and codebase is documented in a different repo. The Redis database container is built from a docker image distributed by the Redis team and has no configuration applied other than instructing it to rebuild itself from a log file if the container goes down. All the containers are hooked into a private network bridge, allowing them to communicate internally in a simulated data centre. Docker's user-defined bridges also allow for internal domain resolution with no configuration, so linking the containers within the code itself is easy. The main backend server has a port that is linked to an external port facing the actual web. Through this, traffic is served. 
+The main program runs inside of a docker container linked with two other containers - one is the Redis database and the other is my status server. The status server is a custom-built solution for quickly checking the status of all my web apps from a publically facing interface, saving the hassle of logging into the VPS and running docker commands. Unfortunately, it's rather unstable and likes to exit with no log on why. That system and codebase is documented in a different repo. The Redis database container is built from a docker image distributed by the Redis team and has no configuration applied other than instructing it to rebuild itself from a log file if the container goes down. All the containers are hooked into a private network bridge, allowing them to communicate internally in a simulated data centre. Docker's user-defined bridges also allow for internal domain resolution with no configuration, so linking the containers within the code itself is easy. The main backend server has a port that is linked to an external port facing the actual web. Through this, traffic is served.
+
+### docker commands
+```sh
+docker run --name some-redis --network my-net redis redis-server --appendonly yes
+```
+```sh
+docker run --name wback --env-file .env --network my-net -p 50300:50300 wback
+```
+```sh
+docker network create my-net
+```
+### A note on the redis container
+The container exposes the default redis server port to the internal network only, and is therefore completely unprotected. Any client on the network is able to write and read to the database. Redis can be configured with auth if hosted on a network with an internet facing port.
 
 ## Container structure
 Docker builds the container from the `Dockerfile` file. It gets the latest alpine node image, copies in my code and executes `index.js`. 
@@ -128,15 +141,39 @@ This shouldn't have delayed me as much as I did. For a segment of the project, I
 Containers are not auto restarted when they go down or anything like that, causing problematic service reliability. Learning and implementing Kubernetes would solve this, though I am not in the state of mind right now to continue working on this godforsaken project. It went downhill as soon as I didn't properly write a design doc beforehand.
 
 ## Dates
-Dates suck. It was problematic. As of writing, it is still problematic. The whole world should just use utc and abolish time zones. Even better lets just use unix time.
+Dates suck. It was problematic. As of writing, it is still problematic. The whole world should just use utc and abolish time zones. Even better lets just use unix epoch time.
+
+## File encoding (I think)
+When my browser fetches and executes the javascript for my front end, it likes to add special characters. When adding the `°` icon it is converted to `Â°` upon loading. Hosting the files on netlify seems to clear the issue up, local testing of the files will just be a little annoying.
 
 # Testing
 Yeah no I didn't test properly. That's all I have to say for this heading. I don't know how to test things properly.
+## False data
+Manually testing and developing something still required some data, and so I added some false data to the database. When datascraping is reenabled, it will partially overwrite these values.
+```js
+app.get("/dbInjection", (req, res) => {
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-16`, 20)
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-17`, 22)
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-18`, 23)
+
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-16`, 25)
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-17`, 27)
+	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-18`, 19)
+
+	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-16`, 23)
+	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-17`, 25)
+	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-18`, 22)
+
+	res.json("OK")
+})
+```
 
 # Time distribution and delayed submission
 Consistently distributing time on this project was difficult. Prototyping and laying out the relevant services and architecture was an intriguing and motivating exercise, in which I was forced to consider the amount of time I had and what skills I could use to effectively implement my goal before the due date. The next day I got out of bed ready to work and it suddenly occurred to me to read up on boot processes and Linux distros. I spent three days working around the clock to customise three different machines. Post that momentary endeavour, I worked on the project around the clock. Multiple hours a day for an entire week. My time mismanagement within this stage was to do with exploring features and methods of doing things that I didn't end up using. Really in retrospect, this inefficiency could be almost exclusively mitigated by working to a proper design doc. I did not. After working for a week straight, I was completely burnt out and in no position to submit. So the only progress I made in the following week was CORS and a little bit of work on the front end. Oh yeah in the midst of all this I also had to start and finish three other assessments, further decreasing the number of hours I could cope with working on the project.\
 
 The final week I had was tasked with finishing the API endpoint, all of the boilerplate front end and learning a graph library.
+
+# Screenshots
 
 # Final words
 This project was regrettable. I learnt honestly not nearly as much I should have for the amount of time I spent on it, but it is done now.
