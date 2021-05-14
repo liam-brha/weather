@@ -53,6 +53,67 @@ fetch("https://back.textedit.dev:50300/api")
 	// current temperature display
 	let tempString = `${response.temp.current}°`
 	document.getElementById("CurrentTemp").innerHTML = tempString
+	// graph construction
+	Highcharts.chart('highchartgraph', {
+
+	  title: {
+	    text: 'Predicted Weather vs Real Weather'
+	  },
+
+	  subtitle: {
+	    text: 'Source: open weather api'
+	  },
+
+	  yAxis: {
+	    title: {
+	      text: 'Temperature'
+	    }
+	  },xAxis: {
+        categories: ["2021-05-15"]
+      },
+
+	  legend: {
+	    layout: 'vertical',
+	    align: 'right',
+	    verticalAlign: 'middle'
+	  },
+
+	  plotOptions: {
+	    series: {
+	      label: {
+	        connectorAllowed: false
+	      },
+	      pointStart: "2021-05-14"
+	    }
+	  },
+
+	  series: [{
+	    name: '7 day projection',
+	    data: response.temp.history.svn.map(current => current.value)
+	  }, {
+	    name: '1 day projection',
+	    data: response.temp.history.tmr.map(current => current.value)
+	  }, {
+	    name: 'real weather',
+	    data: response.temp.history.trueData.map(current => current.value)
+	  }],
+
+	  responsive: {
+	    rules: [{
+	      condition: {
+	        maxWidth: 500
+	      },
+	      chartOptions: {
+	        legend: {
+	          layout: 'horizontal',
+	          align: 'center',
+	          verticalAlign: 'bottom'
+	        }
+	      }
+	    }]
+	  }
+
+	});
 })
 
 // slide logic handling
