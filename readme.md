@@ -1,7 +1,9 @@
 
+# Poorly exectuted school project, not much to see here
+
 https://weather.textedit.dev/
 
-# A refection and justifcation on the project
+# A refection on the project
 
 My inital goal was to create a website at weather.textedit.dev that would report to you the current temperature, chance of rain and have a pretty background. Obviously this doesn't satisfy the goal of the unit - data analysis. In response, an extra feature was planned; a weather prediction and actual temperature logger to determine accuracy of forecasting services. 
 
@@ -59,8 +61,13 @@ As undenibly sad as this code is, it does what I wish it to.
 ## Main control flow
 The control flow of program is event driven, with a functional program approach taken within the trigger statements themselves. I do not know if this is good or bad, as I have never taken a proper programming class in my life, but it is how I normally program.
 ### event triggers
-The event triggers are handled by expressjs, a nodejs library for building 
+The event triggers are handled by expressjs, a nodejs framework for serving requests. The framework isn't really verbose at all if you don't want it to be, which is great for me as it greatly simplifies my job. There is only one actual endpoint for my website, handled by `app.get` with a string and a callback. The only other event trigger is `rclinet.on` which is just for configuring the handling of the redis database.
+#### /API/ walkthrough
+Initally, the skelton of the object we wish to resolve the request to is constructed. We then fetch the current weather data from the moment and incoperate the relevant fields into the object. The historical data is also fetched, and then the object is refined into its final form and served to the request.
 ### timers
+A timer is set to execute hour that fetches the weather data of the time and writes into the database. Another timer polls the internal status server.
+
+## Front end
 
 # Issues
 ## CORS
@@ -71,3 +78,28 @@ My VPS runs out of ram. I'm not sure about the frequency - I havent tested. I th
 
 ## BOM api issue
 I spent, to no exaggeration, upward of seven hours on this. Considering that I ended up using open weather anyway, the effort was completed wasted and worst of all - I didn't actually learn anything directly related to programming. The inital issue was where to fetch the data. BOM likes XML and RSS and a lot of old tech that just isn't supported easily with my tech stack. There is also a fairly large lack of documentation beyond "yeah you can fetch some data here in these folders over ftp". Exploring this web of an ftp server didn't clarify much, knowing almost nothing about short hand weather terms myself. I also investigated use of XML parsing tools for nodejs, but nothing easy and well documented appeared. I then quickly googled for other endpoints and a stackoverflow post from a few years ago with two upvotes pointed to a new endpoint, one with nothing but path parameters. It was in JSON format! Loading the endpoint in my browser returned the last 72 hours of weather data. I converted it to js code and fetched the point, but only to be returned with "sorry we dont allow webscraping on our api endpoints anymore." So I spoofed my user agent into being a regular browser request and it worked again. Unfortunately, when executing the code on my VPS it would think I was a scraper no matter what degree of spoofing I tried. Each one of these issues I spent multiple hours working through and strongly contributed toward my burnout on the project. My key learning from this was "don't spend hours working around the issue, redesign the code to avoid the issue in the first place". The scale of this issue did not equate well to the hours I invested into it.
+
+## Control flow pains
+I spent over a day thinking about how I could use a workaround to ensure my inital 10 lines of code I had already written would work, and ended up just deleting the original code and starting again. Within the style of work I use (completely unplanned development), this doens't work. Deleteing the code and rewriting the control flow for the function was initally what I should have done, but I was unable to see that as an option. This, in conjuction with my issues on the bom api, has forced me to reflect on workflow and decesion making efficency. My "scope of thought" tends to match the scope of the program that I'm currently working in, and this particular issue has expanded my "scope of thought". I coined that term just now, now clue if its actually correct to write.\
+\
+Oh yeah the actual issue was to do with asynecourous module exectuion and needing it to be executed sycously and returning the value with a callback to a higher function. It was dumb and stupid and just didn't make sense.
+
+## Version control
+This shouldn't have delayed me as much as I did. For a segement of the project I was working on a different branch as I was reluctant to delete my bom api code having worked on it for several hours. Really it was just repeatedly exectuing the wrong commands in the wrong order trying to sync the code between my three machines that I was regularly testing the code on.
+
+# Testing
+Yeah no I didn't test properly. That's all I have to say for this heading. I don't know how to test things prperly.
+
+# Time distribuation and delayed submission
+Consistantly distributing time on this project was difficult. Prototyping and laying out the relevant services and arcitecure was an intruging and motivating exercise, in which I was forced to consider the amount of time I had and what skills I could use to effictively implient my goal before the due date. The next day I got out of bed ready to work and it suddenly occured to me to read up on boot processes and linux distros. I spent three days working around the clock to customise three different machines. Post that momentrary endevour, I worked on the project around the clock. Multiple hours a day for an entire week. My time mismanagment within this stage was to do with exploring features and methods of doing things that I didn't actually end up using. Really in retrospect, this inefficency could be almost exlcusively mitigated by working to a proper design doc. I did not. After working for a week straight, I was completely burnt out and in no position to submit. So the only progress I made in the following week was CORS and a little bit of work on the front end. Oh yeah in the midst of all this I also had to start and finish three other assessments, further decreasing the amount of hours I could cope with working on the project.\
+
+The final week I had was tasked with finishing the API endpoint, all of the boilerplate front end and learning a graph library.
+
+# Final words
+This project was regettable. I learnt honestly not nearly as much I should have for the amount of time I spent on it, but it is done now.
+## Assessment
+Under anyalsis of data, I performed to a medium really. Very little actual reflection on the data collected occured. The data collection also kind of sucked cause there is like four points of data. Though the amount of data will build up over time.\
+Design wise, a medium here. A generous medium.\
+Development, a generous medium again. Proper testing methods were not impliented again. The only complex part of this project was the messy control flow. Which isn't even a good thing.\
+"Evaluation" wise, I really don't know how to interpret this one. Pressumably the project performs to a very low level if I didn't deliberately implient anything to reflect it.
+The work I performed throughout the project really kind of didn't reflect the point of the unit overall, which is disapointing and due to my own lack of capasity for building full stack apps efficently.
