@@ -36,17 +36,33 @@ a {
 	transition: all 1.5s;
 	grid-row-start: 1;
 	grid-column-start: 1;
-	background-color: var(--backgroundColor);
+	background-color: rgba(128, 115, 116, 0.6);
 	border-radius: 25px;
 	padding: 20px;
+	display: grid;
+	height: 600px;
+	grid-column-gap: 10px;
+	grid-template-columns: 500px 200px;
 }
+#graphtext {
+	color: var(--fontColor);
+	font-family: Helvetica, sans-serif;
+}
+#highchartgraph {
+	border-color: var(--fontColor);
+	border-style: solid;
+	border-width: 2px;
+	border-radius: 2px;
+
+}
+
 #CurrentTempBox {
 	position: relative;
 	transition-timing-function: ease;
 	transition: all 1.5s;
 	grid-row-start: 1;
 	grid-column-start: 1;
-	background-color: var(--backgroundColor);
+	background-color: rgba(128, 115, 116, 0.6);
 	border-radius: 25px;
 	padding: 20px;
 }
