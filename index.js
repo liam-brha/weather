@@ -12,12 +12,12 @@ console.log(process.env.opentoken)
 // express app config
 const app = express();
 app.use(express.static("./public"));
-// app.use((req, res, next) => {
-// 	if(req.protocol === "http") {
-// 		res.redirect(301, `https://${req.headers.host}${req.url}`)
-// 	}
-// 	next()
-// })
+app.use((req, res, next) => {
+	if(req.protocol === "http") {
+		res.redirect(301, `https://${req.headers.host}${req.url}`)
+	}
+	next()
+})
 
 // redis app config
 const rclient = redis.createClient("redis://some-redis:6379");
@@ -163,9 +163,9 @@ function historyfetch() {
 	})
 }
 // inital dataset generation
-// historyfetch()
+historyfetch()
 // refresh dataset every hour
-// setInterval(historyfetch, 600000)
+setInterval(historyfetch, 600000)
 
 // status server polling
 setInterval(() => {
@@ -177,15 +177,15 @@ setInterval(() => {
 }, 20000)
 
 // importing ssl details
-// httpsOptions = {
-// 	cert: fs.readFileSync("./ssl/back_textedit_dev.crt"),
-// 	ca: fs.readFileSync("./ssl/back_textedit_dev.ca-bundle"),
-// 	key: fs.readFileSync("./ssl/back_textedit_dev.key")
-// }
+httpsOptions = {
+	cert: fs.readFileSync("./ssl/back_textedit_dev.crt"),
+	ca: fs.readFileSync("./ssl/back_textedit_dev.ca-bundle"),
+	key: fs.readFileSync("./ssl/back_textedit_dev.key")
+}
 // server initialisation
-// const httpsServer = https.createServer(httpsOptions, app)
-// httpsServer.listen(50300, "0.0.0.0", () => console.log("listening 433"))
+const httpsServer = https.createServer(httpsOptions, app)
+httpsServer.listen(50300, "0.0.0.0", () => console.log("listening 433"))
 
 // local testing
-const httpServer = http.createServer(app)
-httpServer.listen(50300, () => console.log("listening"))
+// const httpServer = http.createServer(app)
+// httpServer.listen(50300, () => console.log("listening"))
