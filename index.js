@@ -84,7 +84,7 @@ app.get("/API", (req, res) => {
 						rclient.MGET(keyList, (err, reply) => {
 							// construct array
 							for(i in reply) {
-								trueData.push({ "time": keyList[i].split(":")[5], "value": reply[i]})
+								trueData.push({ "time": keyList[i].split(":")[4], "value": reply[i]})
 							}
 							callback(trueData)
 						})
@@ -93,7 +93,7 @@ app.get("/API", (req, res) => {
 				callFunc3((trueData) => {
 					dataObj.temp.history.svn.push(...svn);
 					dataObj.temp.history.tmr.push(...tmr);
-					dataObj.temp.history.trueData.push(...tmr);
+					dataObj.temp.history.trueData.push(...trueData); // took me 30 minutes to realise i copied ...tmr
 					res.json(dataObj);
 				})
 			})	
@@ -117,7 +117,6 @@ function historyfetch() {
 	fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=-37.840935&lon=144.946457&exclude=minutely,hourly,alerts&appid=${process.env.opentoken}&units=metric`)
 	.then(res => res.json())
 	.then(fetchedData => {
-		console.log(fetchedData)
 		// object construction
 		newData.temp.forecastHistory.tomorrow = { "temp": fetchedData.daily[1].temp, "date": fetchedData.daily[1].dt }
 		newData.temp.forecastHistory.sevenday = { "temp": fetchedData.daily[fetchedData.daily.length - 1].temp, "date": fetchedData.daily[fetchedData.daily.length - 1].dt }
@@ -143,7 +142,7 @@ function historyfetch() {
 // inital dataset generation
 historyfetch()
 // refresh dataset every hour
-setInterval(historyfetch, 3600000)
+setInterval(historyfetch, 600000)
 
 // status server polling
 setInterval(() => {
