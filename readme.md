@@ -19,6 +19,13 @@ client side:
 - html
 - highcharts
 
+# workflow
+The "Doc" file in the repo is a small script I wrote for rebuilding and executing the container. Really workflow was:
+1. edit code
+2. run script
+3. manually test changes and hope you clicked enough things to verify nothing broke\
+A key issue with rebuilding the docker container every single time was speed. My macbook and server take multiple seconds to build the container, though my PC is blazing fast. But then on my pc the terminal kind of dies because wsl + windows terminal sucks so I can't test anything properly there anyway.
+
 # The aritecture
 
 ## Server hosting
@@ -26,6 +33,9 @@ Static file hosting is seperated from the main backend server to both simplify a
 
 ## Docker
 The main program runs inside of a docker container linked with two other containers - one is the redis database and the other is my personal status server. The status server is a custom built solution for quickly checking the status of all my webapps from a publically facing interface, saving the hastle of logging into the VPS and running docker commands. Unfortuately its rather unstable and likes to exit with no log on why. That system and codebase is documented in a different repo. The redis database container is built from a docker image distributed by the redis team, and has no configuration applied other than instructing it to rebuild itself from a log file if the container goes down. All the containers are hooked into a private network bridge, allowing them to communicate internally in a simulated data center. Docker's user defined bridges also allow for internal domain resolution with no configuration, so linking the containers within the code itself is easy. The main backend server has a port that is linked to an external port facing the actual web. Through this, traffic is served. 
+
+## Container structure
+Docker builds the container from the `Dockerfile` file. It gets the latest alpine node image, copies in my code and executes `index.js`. 
 
 ## Domain structure
 Netlify is setup with weather.textedit.dev and the backend is on back.textedit.dev:50300. The choice of ports binded to different services was one of economic choice - I did not wish to pay for an SSL certificate for every container I ran.
