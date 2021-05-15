@@ -68,8 +68,10 @@ fetch("https://back.textedit.dev:50300/api")
 	    title: {
 	      text: 'Temperature'
 	    }
-	  },xAxis: {
-        categories: ["2021-05-15"]
+	  },
+
+	  xAxis: {
+	  	type: 'datetime'
       },
 
 	  legend: {
@@ -82,20 +84,37 @@ fetch("https://back.textedit.dev:50300/api")
 	    series: {
 	      label: {
 	        connectorAllowed: false
-	      },
-	      pointStart: "2021-05-14"
+	      }
 	    }
 	  },
 
 	  series: [{
 	    name: '7 day projection',
-	    data: response.temp.history.svn.map(current => current.value)
+	    data: response.temp.history.svn.map(current => {
+	    	let dataConstruc = {
+	    		y: parseInt(current.value),
+	    		x: new Date(current.time)
+	    	}
+	    	return dataConstruc
+	    }),
 	  }, {
 	    name: '1 day projection',
-	    data: response.temp.history.tmr.map(current => current.value)
+	    data: response.temp.history.tmr.map(current => {
+	    	let dataConstruc = {
+	    		y: parseInt(current.value),
+	    		x: new Date(current.time)
+	    	}
+	    	return dataConstruc
+	    })
 	  }, {
 	    name: 'real weather',
-	    data: response.temp.history.trueData.map(current => current.value)
+	    data: response.temp.history.trueData.map(current => {
+	    	let dataConstruc = {
+	    		y: parseInt(current.value),
+	    		x: new Date(current.time)
+	    	}
+	    	return dataConstruc
+	    })
 	  }],
 
 	  responsive: {
