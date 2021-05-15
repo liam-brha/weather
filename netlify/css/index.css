@@ -1,6 +1,6 @@
 :root {
 	--backgroundColor: #807374;
-	--fontColor: #ff9aa2;
+	--fontColor: #ccc;
 }
 
 html {
@@ -36,7 +36,7 @@ a {
 	transition: all 1.5s;
 	grid-row-start: 1;
 	grid-column-start: 1;
-	background-color: rgba(128, 115, 116, 0.6);
+	background-color: rgba(128, 115, 116, 1);
 	border-radius: 25px;
 	padding: 20px;
 	display: grid;
@@ -62,14 +62,16 @@ a {
 	transition: all 1.5s;
 	grid-row-start: 1;
 	grid-column-start: 1;
-	background-color: rgba(128, 115, 116, 0.6);
+	background-color: rgba(128, 115, 116, 1);
 	border-radius: 25px;
 	padding: 20px;
+	display: grid;
 }
 #CurrentTemp {
 	color: var(--fontColor);
 	font-family: Helvetica, sans-serif;
 	font-size: 60px;
+	justify-self: center;
 }
 .locationbox {
 	width: 100%;
