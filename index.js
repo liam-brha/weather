@@ -97,10 +97,19 @@ app.get("/API", (req, res) => {
 					})
 				}
 				callFunc3((trueData) => {
-					dataObj.temp.history.svn.push(...svn);
-					dataObj.temp.history.tmr.push(...tmr);
-					dataObj.temp.history.trueData.push(...trueData); // took me 30 minutes to realise i copied ...tmr
+					// build object to return and sort avalible data
+					dataObj.temp.history.svn = svn.sort((a, b) => {
+						return new Date(a.time) - new Date(b.time)
+					})
+					dataObj.temp.history.tmr = tmr.sort((a, b) => {
+						return new Date(a.time) - new Date(b.time)
+					})
+					dataObj.temp.history.trueData = trueData.sort((a, b) => {
+						return new Date(a.time) - new Date(b.time)
+					})
+					// configure cors
 					res.header("Access-Control-Allow-Origin", "*")
+					// complete the response
 					res.json(dataObj);
 				})
 			})	
