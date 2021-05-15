@@ -118,17 +118,12 @@ app.get("/API", (req, res) => {
 })
 
 app.get("/dbInjection", (req, res) => {
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-16`, 20)
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-17`, 22)
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-18`, 23)
-
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-16`, 25)
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-17`, 27)
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-18`, 19)
-
-	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-16`, 23)
-	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-17`, 25)
-	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-18`, 22)
+	let dateArray = ["2021-05-01", "2021-05-02", "2021-05-03", "2021-05-04", "2021-05-05", "2021-05-07"]
+	for(i in dateArray) {
+		rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:${dateArray[i]}`, Math.floor(Math.random() * 25) + 18)
+		rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:${dateArray[i]}`, Math.floor(Math.random() * 25) + 18)
+		rclient.set(`WEATHER:TEMP:HISTORY:REAL:${dateArray[i]}`, Math.floor(Math.random() * 25) + 18)
+	}
 
 	res.json("OK")
 })
