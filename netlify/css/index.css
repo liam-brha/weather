@@ -42,7 +42,7 @@ a {
 	display: grid;
 	height: 600px;
 	grid-column-gap: 10px;
-	grid-template-columns: 500px 200px;
+	grid-template-columns: 500px 300px;
 }
 #graphtext {
 	color: var(--fontColor);
