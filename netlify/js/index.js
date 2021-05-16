@@ -143,7 +143,7 @@ let currentStatus = {
 }
 let moveLock = false
 
-arrowleft.addEventListener("click", (event) => {
+arrowright.addEventListener("click", (event) => {
 	if(moveLock == false) {
 		moveLock = true
 		currentStatus.off.style.right = "0px"
@@ -165,7 +165,7 @@ arrowleft.addEventListener("click", (event) => {
 	}
 })
 
-arrowright.addEventListener("click", (event) => {
+arrowleft.addEventListener("click", (event) => {
 	if(moveLock == false) {
 		moveLock = true
 		currentStatus.off.style.transition = "all 0s"
