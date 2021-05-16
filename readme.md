@@ -203,6 +203,9 @@ Dates suck. It was problematic. As of writing, it is still problematic. The whol
 ## File encoding (I think)
 When my browser fetches and executes the javascript for my front end, it likes to add special characters. When adding the `°` icon it is converted to `Â°` upon loading. Hosting the files on netlify seems to clear the issue up, local testing of the files will just be a little annoying.
 
+## Smaller screen sizes
+So I'm really lazy and it's not like anyone is going to view this on their phone anyway. But if they do it's really broken.
+
 # Testing
 Yeah no I didn't test properly. That's all I have to say for this heading. I don't know how to test things properly.
 ## False data
