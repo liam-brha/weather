@@ -87,6 +87,21 @@ The control flow of the program is event-driven, with a functional program appro
 The event triggers are handled by expressjs, a nodejs framework for serving requests. The framework isn't verbose at all if you don't want it to be, which is great for me as it greatly simplifies my job. There is only one actual endpoint for my website, handled by `app.get` with a string and a callback. The only other event trigger is `rclient.on` which is just for configuring the handling of the Redis database.
 #### /API/ walkthrough
 Initially, the skeleton of the object we wish to resolve the request to is constructed. We then fetch the current weather data from the moment and incorporate the relevant fields into the object. The historical data is also fetched, and then the object is refined into its final form and served to the request. The style of chaining callbacks is rather awkward in my eyes, but I have not been taught not to do it like this so I shall. In retrospect, I really should have used a function for this. Rather than copying and pasting the code three times. This is like the most elementry use of a function possible and I didn't do it. In fact, asynchronously fetching the data from all three of the db keys would have made so much more sense. JS is litterally built for this.
+##### Sorting
+Upon retrieval of the dataset, it is completely unsorted. This caused issues with the line graph rendering, as seen below. I impliented this sorting code to fix it:
+```js
+// build object to return and sort avalible data
+dataObj.temp.history.svn = svn.sort((a, b) => {
+	return new Date(a.time) - new Date(b.time)
+})
+dataObj.temp.history.tmr = tmr.sort((a, b) => {
+	return new Date(a.time) - new Date(b.time)
+})
+dataObj.temp.history.trueData = trueData.sort((a, b) => {
+	return new Date(a.time) - new Date(b.time)
+})
+```
+`.sort()` sorts the data based off the returned value of the callback function. if value 0, its equal; if value>0, its larger; if value<0 its smaller. The date function subtraction works because of stuff behind the scenes with the inbuilt date function that I don't control.
 #### /API/ object structure
 ```json
 {
@@ -121,12 +136,46 @@ The front end ended up being a very enjoyable part of the project that I did 95%
 
 ### Animations
 
-Much of my time spent was on animations, and making the site look pretty. It was an intruging and useful exercise for future projects, but is irrelevant to what I will be marked on.
+Much of my time spent was on animations, and making the site look pretty. It was an intruging and useful exercise for future projects, but is irrelevant to what I will be marked on.\
+\
+The animations are all controlled through css transition times, with the css postional values being altered on events.
+\
+\
+Triggers for the bottom bar expanding and retracting are controlled by a seperate invisble div, as to allow the bar to expand with the cursor crossing near it rather than on it. The div also retracts when the bar expands as to allow events to be triggered on elements inside the bar without being overlapped with the invisble div.
+#### animations on the invible div and bar
+```js
+barbox.addEventListener("mouseenter", (event) => {
+	bar.style.height = "40px"
+	barbox.style.height = "60px"
+	barbox.style.bottom = "40px"
+	arrow.style.width = "20px"
+	arrowleft.style.bottom = "-7px"
+	arrowright.style.bottom = "-7px"	
+	github.style.bottom = "0px"
+});
+```
 
-### Data retrival
+All the data is retrived through the single endpoint, and then a graph is constructed around it. The endpoint also constructs the current temperature box and sets the background.
 
-All the data is retrived through the single endpoint, and then a graph is constructed around it. It also constructs the current temperature box and sets the background.
-
+### Graph logic
+The graph is set to configure itself automatically mostly. The headings, datapoints and type of graph were configured by me.\
+Datapoint sorting is constructed by simply setting the x and y value to the respective piece of data. The data is sorted server side, and so it can freely iterate over the data with no weird looking lines.\
+```js
+series: [{
+	name: '7 day projection',
+	data: response.temp.history.svn.map(current => {
+  		let dataConstruc = {
+  			y: parseInt(current.value),
+  			x: new Date(current.time)
+  		}
+  		return dataConstruc
+  	}),
+},
+```
+#### weird looking lines
+![messed up graph](https://media.discordapp.net/attachments/772767870513840129/843114341540167730/unknown.png?width=402&height=348)
+#### sorted data
+![sorted graph](https://media.discordapp.net/attachments/843359734660726815/843359755354243082/unknown.png?width=464&height=348)
 # Issues
 ## CORS
 Though I had heard of great pains in Cross-Origin Resource Sharing before starting this project, the issues I had were brief and quickly resolved. Simply adding in a wildcard header to my API endpoint fixed it. CORS prevents different domains from using resources without explicit permissions configured in the headers, and my backend being hosted on a different domain creates this issue.
@@ -178,7 +227,12 @@ Consistently distributing time on this project was difficult. Prototyping and la
 The final week I had was tasked with finishing the API endpoint, all of the boilerplate front end and learning a graph library.
 
 # Screenshots
-
+## Home page
+![Home page](https://cdn.discordapp.com/attachments/843359734660726815/843362246859423794/unknown.png)
+## Home page with expanded bar
+![Home page with expanded bar](https://cdn.discordapp.com/attachments/843359734660726815/843362827900289024/unknown.png)
+## Graph page
+![Graph page](https://cdn.discordapp.com/attachments/843359734660726815/843363010319220786/unknown.png)
 # Final words
 This project was regrettable. I learnt honestly not nearly as much I should have for the amount of time I spent on it, but it is done now.
 ## Assessment
