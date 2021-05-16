@@ -160,21 +160,17 @@ Yeah no I didn't test properly. That's all I have to say for this heading. I don
 Manually testing and developing something still required some data, and so I added some false data to the database. When datascraping is reenabled, it will partially overwrite these values.
 ```js
 app.get("/dbInjection", (req, res) => {
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-16`, 20)
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-17`, 22)
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:2021-05-18`, 23)
-
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-16`, 25)
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-17`, 27)
-	rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:2021-05-18`, 19)
-
-	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-16`, 23)
-	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-17`, 25)
-	rclient.set(`WEATHER:TEMP:HISTORY:REAL:2021-05-18`, 22)
+	let dateArray = ["2021-05-01", "2021-05-02", "2021-05-03", "2021-05-04", "2021-05-05", "2021-05-07"]
+	for(i in dateArray) {
+		rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:TMR:${dateArray[i]}`, Math.floor(Math.random() * 25) + 18)
+		rclient.set(`WEATHER:TEMP:HISTORY:FORECAST:SVN:${dateArray[i]}`, Math.floor(Math.random() * 25) + 18)
+		rclient.set(`WEATHER:TEMP:HISTORY:REAL:${dateArray[i]}`, Math.floor(Math.random() * 25) + 18)
+	}
 
 	res.json("OK")
 })
 ```
+note: updated this code to cover a wider dataset for testing, but the datapoints are all over the shot
 
 # Time distribution and delayed submission
 Consistently distributing time on this project was difficult. Prototyping and laying out the relevant services and architecture was an intriguing and motivating exercise, in which I was forced to consider the amount of time I had and what skills I could use to effectively implement my goal before the due date. The next day I got out of bed ready to work and it suddenly occurred to me to read up on boot processes and Linux distros. I spent three days working around the clock to customise three different machines. Post that momentary endeavour, I worked on the project around the clock. Multiple hours a day for an entire week. My time mismanagement within this stage was to do with exploring features and methods of doing things that I didn't end up using. Really in retrospect, this inefficiency could be almost exclusively mitigated by working to a proper design doc. I did not. After working for a week straight, I was completely burnt out and in no position to submit. So the only progress I made in the following week was CORS and a little bit of work on the front end. Oh yeah in the midst of all this I also had to start and finish three other assessments, further decreasing the number of hours I could cope with working on the project.\
