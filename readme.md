@@ -224,6 +224,9 @@ app.get("/dbInjection", (req, res) => {
 ```
 note: updated this code to cover a wider dataset for testing, but the datapoints are all over the shot
 
+## more date issues
+So the 1 day ahead prediction is ahead by an extra day. thats a very large issue.
+
 # Time distribution and delayed submission
 Consistently distributing time on this project was difficult. Prototyping and laying out the relevant services and architecture was an intriguing and motivating exercise, in which I was forced to consider the amount of time I had and what skills I could use to effectively implement my goal before the due date. The next day I got out of bed ready to work and it suddenly occurred to me to read up on boot processes and Linux distros. I spent three days working around the clock to customise three different machines. Post that momentary endeavour, I worked on the project around the clock. Multiple hours a day for an entire week. My time mismanagement within this stage was to do with exploring features and methods of doing things that I didn't end up using. Really in retrospect, this inefficiency could be almost exclusively mitigated by working to a proper design doc. I did not. After working for a week straight, I was completely burnt out and in no position to submit. So the only progress I made in the following week was CORS and a little bit of work on the front end. Oh yeah in the midst of all this I also had to start and finish three other assessments, further decreasing the number of hours I could cope with working on the project.\
 
