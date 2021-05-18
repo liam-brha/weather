@@ -128,7 +128,7 @@ app.get("/dbInjection", (req, res) => {
 	res.json("OK")
 })
 
-app.get("/dbInjection", (req, res) => {
+app.get("/dbInjectionCut", (req, res) => {
 	let dateArray = ["2021-05-01", "2021-05-02", "2021-05-03", "2021-05-04", "2021-05-05", "2021-05-07"]
 	for(i in dateArray) {
 		rclient.del(`WEATHER:TEMP:HISTORY:FORECAST:TMR:${dateArray[i]}`)
