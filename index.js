@@ -1,5 +1,3 @@
-// serialisation to db is ok, but reconstructing the array and processing it is just terrible
-
 const fs = require("fs");
 const http = require("http");
 const https = require("https");
@@ -19,17 +17,12 @@ app.use((req, res, next) => {
 	next()
 })
 
-// redis app config
 const rclient = redis.createClient("redis://some-redis:6379");
 
 rclient.on("error", function(error) {
   console.error(error);
 });
 
-// end points
-
-// core api end point for front end
-// i dont know how to write async stuff synchronously without being an absolute fucking mess
 app.get("/API", (req, res) => {
 	// object skeleton
 	let tempNum = Math.floor(Math.random() * 36).toString()
@@ -189,7 +182,7 @@ setInterval(() => {
 	}).catch(e => { console.log("status server down") })
 }, 20000)
 
-// importing ssl details
+// importing certs
 httpsOptions = {
 	cert: fs.readFileSync("./ssl/back_textedit_dev.crt"),
 	ca: fs.readFileSync("./ssl/back_textedit_dev.ca-bundle"),
@@ -197,7 +190,7 @@ httpsOptions = {
 }
 // server initialisation
 const httpsServer = https.createServer(httpsOptions, app)
-httpsServer.listen(50300, "0.0.0.0", () => console.log("listening 433"))
+httpsServer.listen(50300, "localhost", () => console.log("listening 433"))
 
 // local testing
 // const httpServer = http.createServer(app)
